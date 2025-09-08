@@ -9,7 +9,7 @@ const urlRoute = require('./routes/url');
 const staticRoute = require('./routes/staticRoute');
 const userRoute = require('./routes/user')
 
-const { restrictToLoggedinUserOnly, CheckAuth } = require('./middlewares/auth')
+const { checkForAuth, restrictTo } = require('./middlewares/auth')
 
 //DB Connection
 DBConnection('mongodb://localhost:27017/Shortener_URL')
@@ -24,10 +24,11 @@ app.set("views", path.resolve('./views'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(checkForAuth);
 
 //routes
-app.use("/url", restrictToLoggedinUserOnly, urlRoute);
-app.use("/", CheckAuth, staticRoute);
+app.use("/url", restrictTo(["NORMAL", "ADMIN"]), urlRoute);
+app.use("/", staticRoute);
 app.use("/user", userRoute);
 
 app.listen(PORT, () => console.log("Server Started Successfully!"));
